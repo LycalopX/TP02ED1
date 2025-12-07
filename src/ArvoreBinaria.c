@@ -19,15 +19,12 @@ TreeNode* create_tree_node(long long cpf, ListNode* dataNode) {
 // Inserção em ABO (Não Balanceada)
 TreeNode* insert_abo(TreeNode* root, long long cpf, ListNode* dataNode) {
     if (root == NULL) {
-        fprintf(stderr, "DEBUG: Inserindo NOVO NO %lld (Nivel ?)\n", cpf);
         return create_tree_node(cpf, dataNode);
     }
     
     if (cpf < root->cpf) {
-        fprintf(stderr, "DEBUG: %lld < %lld (Indo Esquerda)\n", cpf, root->cpf);
         root->left = insert_abo(root->left, cpf, dataNode);
     } else if (cpf > root->cpf) {
-        fprintf(stderr, "DEBUG: %lld > %lld (Indo Direita)\n", cpf, root->cpf);
         root->right = insert_abo(root->right, cpf, dataNode);
     }
     // Se igual, ignoramos (CPFs unicos) 
@@ -45,11 +42,7 @@ int max_val(int a, int b) { return (a > b) ? a : b; }
 
 int tree_height(TreeNode* root) {
     if (root == NULL) return 0; 
-    int h_left = tree_height(root->left);
-    int h_right = tree_height(root->right);
-    int my_h = 1 + max_val(h_left, h_right);
-    // fprintf(stderr, "DEBUG: Altura no CPF %lld: %d (Esq=%d, Dir=%d)\n", root->cpf, my_h, h_left, h_right);
-    return my_h;
+    return 1 + max_val(tree_height(root->left), tree_height(root->right));
 }
 
 TreeNode* get_min_node(TreeNode* root) {
