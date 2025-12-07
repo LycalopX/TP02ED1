@@ -1,0 +1,62 @@
+DEBUG: --- FILE START ---
+L001: [000000004]
+L002: [04]
+L003: [4]
+L004: [4]
+L005: [2004]
+L006: [Fulano4]
+L007: [000000002]
+L008: [02]
+L009: [2]
+L010: [2]
+L011: [2002]
+L012: [Fulano2]
+L013: [000000001]
+L014: [01]
+L015: [1]
+L016: [1]
+L017: [2001]
+L018: [Fulano1]
+L019: [000000003]
+L020: [03]
+L021: [3]
+L022: [3]
+L023: [2003]
+L024: [Fulano3]
+L025: [000000006]
+L026: [06]
+L027: [6]
+L028: [6]
+L029: [2006]
+L030: [Fulano6]
+L031: [000000005]
+L032: [05]
+L033: [5]
+L034: [5]
+L035: [2005]
+L036: [Fulano5]
+L037: [000000007]
+L038: [07]
+L039: [7]
+L040: [7]
+L041: [2007]
+L042: [Fulano7]
+L043: [-1 $FIM$]
+DEBUG: --- FILE END ---
+DEBUG: Inserindo NOVO NO 4 (Nivel ?)
+DEBUG: 2 < 4 (Indo Esquerda)
+DEBUG: Inserindo NOVO NO 2 (Nivel ?)
+DEBUG: 1 < 4 (Indo Esquerda)
+DEBUG: 1 < 2 (Indo Esquerda)
+DEBUG: Inserindo NOVO NO 1 (Nivel ?)
+DEBUG: 3 < 4 (Indo Esquerda)
+DEBUG: 3 > 2 (Indo Direita)
+DEBUG: Inserindo NOVO NO 3 (Nivel ?)
+DEBUG: 6 > 4 (Indo Direita)
+DEBUG: Inserindo NOVO NO 6 (Nivel ?)
+DEBUG: 5 > 4 (Indo Direita)
+DEBUG: 5 < 6 (Indo Esquerda)
+DEBUG: Inserindo NOVO NO 5 (Nivel ?)
+DEBUG: 7 > 4 (Indo Direita)
+DEBUG: 7 > 6 (Indo Direita)
+DEBUG: Inserindo NOVO NO 7 (Nivel ?)
