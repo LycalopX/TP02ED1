@@ -7,15 +7,15 @@
 
 // Estrutura do nó da Árvore Binária Ordenada (ABO)
 typedef struct TreeNode {
-    long long cpf;      // Chave: CPF
+    char cpf[15];       // Chave: CPF
     ListNode* dataNode; // Ponteiro para o nó na lista (LDE) com os dados completos
     struct TreeNode* left;
     struct TreeNode* right;
 } TreeNode;
 
 // Protótipos
-TreeNode* create_tree_node(long long cpf, ListNode* dataNode);
-TreeNode* insert_abo(TreeNode* root, long long cpf, ListNode* dataNode);
+TreeNode* create_tree_node(char* cpf, ListNode* dataNode);
+TreeNode* insert_abo(TreeNode* root, char* cpf, ListNode* dataNode);
 
 // Funções de análise
 int count_nodes(TreeNode* root);

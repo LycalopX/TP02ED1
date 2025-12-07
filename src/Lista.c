@@ -39,13 +39,8 @@ void print_list_to_file(ListNode* head, FILE* f) {
     ListNode* current = head;
     while (current != NULL) {
         // PDF exemplo: 000000001-01 01/01/2001 Fulano1
-        // Note que CPF tem zeros a esquerda
-        // data.cpf é long long
-        long long base = current->data.cpf;
-        int dv = current->data.dv;
-        
-        fprintf(f, "%09lld-%02d %02d/%02d/%04d %s\n", 
-            base, dv, 
+        fprintf(f, "%s-%s %02d/%02d/%04d %s\n", 
+            current->data.cpf, current->data.dv, 
             current->data.dia, current->data.mes, current->data.ano, 
             current->data.nome);
             

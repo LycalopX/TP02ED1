@@ -1,15 +1,16 @@
 #include "ArvoreBinaria.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 // Cria um nó da árvore. O nó guarda CPF e o ponteiro para a lista.
-TreeNode* create_tree_node(long long cpf, ListNode* dataNode) {
+TreeNode* create_tree_node(char* cpf, ListNode* dataNode) {
     TreeNode* node = (TreeNode*)malloc(sizeof(TreeNode));
     if (!node) {
         perror("Erro memoria TreeNode");
         exit(EXIT_FAILURE);
     }
-    node->cpf = cpf;
+    strcpy(node->cpf, cpf);
     node->dataNode = dataNode;
     node->left = NULL;
     node->right = NULL;
@@ -17,14 +18,16 @@ TreeNode* create_tree_node(long long cpf, ListNode* dataNode) {
 }
 
 // Inserção em ABO (Não Balanceada)
-TreeNode* insert_abo(TreeNode* root, long long cpf, ListNode* dataNode) {
+TreeNode* insert_abo(TreeNode* root, char* cpf, ListNode* dataNode) {
     if (root == NULL) {
         return create_tree_node(cpf, dataNode);
     }
     
-    if (cpf < root->cpf) {
+    int cmp = strcmp(cpf, root->cpf);
+
+    if (cmp < 0) {
         root->left = insert_abo(root->left, cpf, dataNode);
-    } else if (cpf > root->cpf) {
+    } else if (cmp > 0) {
         root->right = insert_abo(root->right, cpf, dataNode);
     }
     // Se igual, ignoramos (CPFs unicos) 
@@ -78,7 +81,7 @@ void write_tree_in_order(TreeNode* root, FILE* f) {
         write_tree_in_order(root->left, f);
         
         if (root->dataNode) {
-             fprintf(f, "%09lld\n", root->cpf);
+             fprintf(f, "%s\n", root->cpf);
         }
         
         write_tree_in_order(root->right, f);

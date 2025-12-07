@@ -8,15 +8,28 @@
 
 // --- Helper Functions ---
 
+// Clean token like the reference implementation: truncate at first non-printable/space
+void clean_token(char* str) {
+    if (!str) return;
+    for (int i = 0; str[i]; i++) {
+        if (str[i] <= 32) { // 32 is space
+            str[i] = '\0';
+            break; 
+        }
+    }
+}
+
 void print_node_data(TreeNode* node) {
     if (node && node->dataNode) {
         Citizen c = node->dataNode->data;
-        printf("%09lld-%02d %02d/%02d/%04d %s\n", 
+        // Format matches reference: %s-%s ...
+        printf("%s-%s %02d/%02d/%04d %s\n", 
                c.cpf, c.dv, c.dia, c.mes, c.ano, c.nome);
     }
 }
 
-void trim_string(char* str) {
+// Remove newline only (safer trim)
+void trim_newline(char* str) {
     size_t len = strlen(str);
     while(len > 0 && (str[len-1] == '\n' || str[len-1] == '\r')) {
         str[len-1] = '\0';
@@ -24,58 +37,18 @@ void trim_string(char* str) {
     }
 }
 
-void normalize_separators(char* str) {
-    for (int i = 0; str[i]; i++) {
-        if (str[i] == ',' || str[i] == ';') {
-            str[i] = ' ';
-        }
-    }
-}
-
 int read_non_empty_line(FILE* f, char* buffer, int size) {
     while (fgets(buffer, size, f) != NULL) {
-        trim_string(buffer);
+        trim_newline(buffer);
         if (strlen(buffer) > 0) return 1;
     }
     return 0;
 }
 
-// Tries to parse a line into a Citizen struct using multiple formats
-int parse_citizen(char* line, Citizen* c) {
-    char temp_line[1024];
-    strcpy(temp_line, line);
-    normalize_separators(temp_line);
-
-    long long cpf_base;
-    char nome_temp[100];
-    int fields;
-
-    // Try format 1: Formatted date/cpf (e.g. "000000001-01 01/01/2001 Name")
-    // Note: %50[^\n] reads the rest of the line including spaces
-    fields = sscanf(temp_line, "%lld-%d %d/%d/%d %50[^\n]", 
-                    &cpf_base, &c->dv, &c->dia, &c->mes, &c->ano, nome_temp);
-
-    // Try format 2: Space separated (e.g. "000000001 01 01 01 2001 Name")
-    if (fields != 6) {
-        fields = sscanf(temp_line, "%lld %d %d %d %d %50[^\n]", 
-                        &cpf_base, &c->dv, &c->dia, &c->mes, &c->ano, nome_temp);
-    }
-
-    if (fields == 6) {
-        c->cpf = cpf_base;
-        trim_string(nome_temp);
-        strncpy(c->nome, nome_temp, 50);
-        c->nome[50] = '\0';
-        return 1; // Success
-    }
-
-    return 0; // Failure
-}
-
 // --- Main ---
 
 int main() {
-    // Disable output buffering for consistent testing
+    // Disable output buffering
     setvbuf(stdout, NULL, _IONBF, 0);
 
     int option;
@@ -85,12 +58,12 @@ int main() {
     if (fgets(buffer, sizeof(buffer), stdin) == NULL) return 1;
     if (sscanf(buffer, "%d", &option) != 1) return 1;
 
-    // Open database
-    FILE* f = fopen("basedados.txt", "r");
+    // Open database - Try CSV first as per reference
+    FILE* f = fopen("basedados.csv", "r");
     if (!f) {
-        f = fopen("basedados.csv", "r");
+        f = fopen("basedados.txt", "r");
         if (!f) {
-            printf("Erro ao abrir basedados.txt\n"); 
+            printf("Erro ao abrir arquivo de dados.\n"); 
             return 1;
         }
     }
@@ -99,28 +72,69 @@ int main() {
     TreeNode* treeRoot = NULL;
 
     // Process file
-    while (read_non_empty_line(f, buffer, sizeof(buffer))) {
+    while (fgets(buffer, sizeof(buffer), f) != NULL) {
         // Check for terminator
         if (strncmp(buffer, "-1", 2) == 0) break;
-
-        Citizen c;
         
-        // Attempt single-line parse
-        if (parse_citizen(buffer, &c)) {
+        // Copy buffer for CSV tokenization
+        char lineCopy[1024];
+        strcpy(lineCopy, buffer);
+
+        // Try CSV parsing (Reference Strategy)
+        char* token = strtok(lineCopy, ",");
+        if (token) {
+            Citizen c;
+            
+            // 1. CPF
+            clean_token(token);
+            strcpy(c.cpf, token);
+
+            // 2. DV
+            token = strtok(NULL, ",");
+            if (!token) continue; // Invalid line
+            clean_token(token);
+            strcpy(c.dv, token);
+
+            // 3. Dia
+            token = strtok(NULL, ",");
+            if (!token) continue;
+            c.dia = atoi(token);
+
+            // 4. Mes
+            token = strtok(NULL, ",");
+            if (!token) continue;
+            c.mes = atoi(token);
+
+            // 5. Ano
+            token = strtok(NULL, ",");
+            if (!token) continue;
+            c.ano = atoi(token);
+
+            // 6. Nome
+            token = strtok(NULL, ",");
+            if (!token) continue;
+            clean_token(token); // Reference also cleans name!
+            strncpy(c.nome, token, 50);
+            c.nome[50] = '\0';
+
+            // Insert
             listHead = insert_list_head(listHead, c);
             treeRoot = insert_abo(treeRoot, c.cpf, listHead);
             continue;
         }
 
-        // Fallback: Multi-line parse logic
-        // If single line parse failed, assume 'buffer' contains just the CPF
-        long long cpf_base;
-        if (sscanf(buffer, "%lld", &cpf_base) != 1) continue;
+        // Fallback: Multi-line parse logic (Only if not CSV)
+        // Original logic adapted for string CPF
+        // Assuming current buffer has CPF if not CSV
         
-        c.cpf = cpf_base;
+        Citizen c;
+        trim_newline(buffer);
+        clean_token(buffer); // Clean potential spaces
+        strcpy(c.cpf, buffer);
 
         if (!read_non_empty_line(f, buffer, sizeof(buffer))) break;
-        c.dv = atoi(buffer);
+        clean_token(buffer);
+        strcpy(c.dv, buffer);
 
         if (!read_non_empty_line(f, buffer, sizeof(buffer))) break;
         c.dia = atoi(buffer);
@@ -132,7 +146,7 @@ int main() {
         c.ano = atoi(buffer);
 
         if (!read_non_empty_line(f, buffer, sizeof(buffer))) break;
-        trim_string(buffer);
+        clean_token(buffer);
         strncpy(c.nome, buffer, 50);
         c.nome[50] = '\0';
 
